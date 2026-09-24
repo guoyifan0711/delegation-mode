@@ -1,6 +1,6 @@
 name = "researcher"
 description = "External evidence researcher for current facts, official sources, documents, industry data, and market signals."
-model = "gpt-5.6-luna"
+model = "gpt-6-luna"
 model_reasoning_effort = "high"
 service_tier = "fast"
 sandbox_mode = "read-only"

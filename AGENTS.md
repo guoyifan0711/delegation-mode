@@ -32,6 +32,13 @@ Delegation Mode is enabled by default for every conversation.
 - Subagents must not spawn further subagents. They return to the Coordinator when their task is complete or when they hit a stop condition.
 - The Coordinator must wait for required subagents, inspect their evidence or changes, resolve conflicts, and independently verify the integrated result before claiming success.
 
+## Execution efficiency
+
+- Before spawning, name the independent deliverable and the work the Coordinator can continue in parallel. Use the fewest subagents needed; avoid duplicate searches or agents waiting on the same dependency.
+- Give each subagent the smallest useful context and a precise return format. Ask for findings, file locations, and verification results rather than raw logs or copied source material.
+- If a subagent reaches its stop condition, encounters a repeated blocker, or needs a decision outside its capsule, it should return the exact decision point promptly. The Coordinator decides the next step before more work is assigned.
+- Use an independent reviewer when the risk or uncertainty warrants one. The Coordinator still verifies the integrated result.
+
 ## Inaccessible source gate
 
 When a `researcher` cannot directly obtain a potentially relevant source:
@@ -68,6 +75,13 @@ Use the smallest useful context fork. Prefer no inherited history or only the fe
 - Decided implementation or deterministic execution -> `worker`
 - High-risk validation or independent second opinion -> `reviewer`
 - Mixed tasks -> the Coordinator may sequence roles, for example explore first, then assign a bounded worker, then review only if risk warrants it.
+
+## Model routing
+
+- Keep the user-selected primary model unchanged. Use the configured GPT-6 model for each subagent role when the host honors that role's configuration.
+- If a host's named role preset pins an older model, use a default subagent with an explicit supported GPT-6 model and the role boundaries in its task capsule. Use no inherited history, or only the few turns needed, when setting a model override.
+- If the host cannot run the requested GPT-6 model, report that limit instead of silently using an older model. A configuration file change does not prove that an already-running session reloaded its agent presets.
+- Default every GPT-6 Luna subagent to Fast mode. Keep `service_tier = "fast"` in each Luna role configuration and verify the effective tier when the host exposes it; if a fallback agent cannot select a tier, report that limitation rather than assume Fast is active.
 
 ## Overrides
 
