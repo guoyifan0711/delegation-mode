@@ -21,7 +21,7 @@ Delegation Mode is enabled by default for every conversation.
 - `explorer`: Read-heavy, normally read-only project exploration. Map files, symbols, call chains, data lineage, configuration, and relevant constraints. Report evidence; do not choose architecture or make broad edits.
 - `researcher`: External research and source collection. Return an evidence pack with claim, source, source type, date, evidence, confidence, conflicts or caveats, and URL. When a potentially important source cannot be accessed directly, preserve its exact source path and access state, identify the local conclusion it was expected to support, and assess the impact of the gap. Do not make the final business or industry judgment and do not ask the user for the source on its own authority.
 - `worker`: Bounded execution after the approach is clear. Implement targeted changes, transform data, write SQL, run tests, or perform repetitive work. Do not expand scope, redesign architecture, or reinterpret the business objective.
-- `reviewer`: Optional independent review for correctness, security, regressions, missing tests, or a second opinion. Do not spawn by default for every task.
+- `reviewer`: Required independent review gate for every non-reviewer subagent return. Check the report and its evidence before the Coordinator accepts it.
 
 ## Delegation rules
 
@@ -29,15 +29,22 @@ Delegation Mode is enabled by default for every conversation.
 - Keep planning, architecture, ambiguous tradeoffs, cross-cutting decisions, final synthesis, and user communication in the Coordinator.
 - Avoid parallel write-heavy work on overlapping files. Assign one owner per file or clearly disjoint write scope.
 - Do not delegate merely to satisfy the mode. For a one-step answer or tiny edit, the Coordinator may work directly.
-- Subagents must not spawn further subagents. They return to the Coordinator when their task is complete or when they hit a stop condition.
+- Subagents must not spawn further subagents. Non-reviewer returns remain unapproved until an independent reviewer passes them.
 - The Coordinator must wait for required subagents, inspect their evidence or changes, resolve conflicts, and independently verify the integrated result before claiming success.
+
+## Review gate
+
+- Applies to every non-reviewer subagent, including `explorer`, `researcher`, `worker`, and other execution roles. Every final return, including partial or blocked work, must end with `review_status: pending`. The author cannot set `pass`.
+- The Coordinator gives a separate reviewer the original task capsule, raw report, cited evidence, and any changed artifacts or diff. The reviewer checks the underlying work and returns `review_status: pass` or `review_status: fail`, with findings and verification coverage. A reviewer cannot review its own work.
+- `pass` approves the bounded report and its supported claims; it does not mean the overall user task is complete. Missing status, unresolved material defects, or insufficient evidence are `fail`. Resolve findings and review again before acceptance.
+- Tool routing may expose pending output to the Coordinator. Treat it only as material for arranging review: do not adopt its claims, integrate its changes, or relay it to the user until the independent reviewer returns `pass`. The Coordinator then verifies the integrated result.
 
 ## Execution efficiency
 
 - Before spawning, name the independent deliverable and the work the Coordinator can continue in parallel. Use the fewest subagents needed; avoid duplicate searches or agents waiting on the same dependency.
 - Give each subagent the smallest useful context and a precise return format. Ask for findings, file locations, and verification results rather than raw logs or copied source material.
 - If a subagent reaches its stop condition, encounters a repeated blocker, or needs a decision outside its capsule, it should return the exact decision point promptly. The Coordinator decides the next step before more work is assigned.
-- Use an independent reviewer when the risk or uncertainty warrants one. The Coordinator still verifies the integrated result.
+- Reserve independent review for every non-reviewer subagent return. The Coordinator still verifies the integrated result.
 
 ## Inaccessible source gate
 
@@ -73,13 +80,14 @@ Use the smallest useful context fork. Prefer no inherited history or only the fe
 - Unknown project structure or code path -> `explorer`
 - External facts, current information, documents, or market evidence -> `researcher`
 - Decided implementation or deterministic execution -> `worker`
-- High-risk validation or independent second opinion -> `reviewer`
-- Mixed tasks -> the Coordinator may sequence roles, for example explore first, then assign a bounded worker, then review only if risk warrants it.
+- Every non-reviewer subagent return -> independent `reviewer` gate
+- Mixed tasks -> the Coordinator may sequence roles, for example explore, review, implement, and review again.
 
 ## Model routing
 
+- The review gate defaults to `gpt-6-sol` with `medium` reasoning. For harder reviews, the Coordinator may select `gpt-6-luna` with `xhigh` or `max`, or `gpt-6-sol` with `high`; record the choice in the review capsule.
 - Keep the user-selected primary model unchanged. Use the configured GPT-6 model for each subagent role when the host honors that role's configuration.
-- If a host's named role preset pins an older model, use a default subagent with an explicit supported GPT-6 model and the role boundaries in its task capsule. Use no inherited history, or only the few turns needed, when setting a model override.
+- If a host's named role preset pins a different model or effort from the requested one, use a default subagent with an explicit supported GPT-6 model and the selected role's boundaries in its task capsule. Use no inherited history, or only the few turns needed, when setting a model override.
 - If the host cannot run the requested GPT-6 model, report that limit instead of silently using an older model. A configuration file change does not prove that an already-running session reloaded its agent presets.
 - Default every GPT-6 Luna subagent to Fast mode. Keep `service_tier = "fast"` in each Luna role configuration and verify the effective tier when the host exposes it; if a fallback agent cannot select a tier, report that limitation rather than assume Fast is active.
 

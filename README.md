@@ -10,17 +10,18 @@ Delegation Mode 是一套面向多代理协作的工作约定，不是自动化�
 4. 子代理只执行边界明确的工作，不递归创建子代理，不扩大范围，不自行做架构或业务判断。独立任务可以并行；有写入的任务应为每个文件指定唯一负责人。Coordinator 必须检查子代理结果并独立验证整合结果。
 5. 如果实施需要超出任务胶囊的决定，子代理应返回决策点并停止，而不是自行扩展范围。
 6. 用完成任务所需的最少子代理，避免重复搜索、等待同一前置条件，或把原始日志和大段来源正文回传给 Coordinator。遇到重复阻塞时及时返回决策点。
+7. 每份非 reviewer 子代理返回都以 `review_status: pending` 结尾。独立 reviewer 审核任务胶囊、证据和变更后给出 `pass` 或 `fail`；Coordinator 只采纳 `pass`。工具可能先把待审原文送达 Coordinator，但它只能用于安排审核。
 
 ## 四个角色
 
-主代理运行在 Ultra 时，子代理仍是可选资源；是否调用由 Coordinator 根据任务收益决定。`reviewer` 也无需在每个任务中默认启动。
+主代理运行在 Ultra 时，是否调用执行层子代理仍由 Coordinator 根据任务收益决定。只要调用非 reviewer 子代理，其每份返回都必须经过独立 reviewer 审核。
 
 | 角色 | 负责内容 | 默认边界 |
 | --- | --- | --- |
 | `explorer` | 探索文件、符号、调用链、配置、数据流和本地证据 | 以读为主，只报告证据，不做架构决定或广泛修改 |
 | `researcher` | 收集外部事实、官方来源和研究证据 | 输出 Evidence Pack；不替 Coordinator 做最终业务、技术或战略判断 |
 | `worker` | 执行已经确定的局部实现、数据转换、SQL 或测试 | 只改任务胶囊列出的范围，按验收条件验证 |
-| `reviewer` | 独立检查正确性、安全、回归、数据完整性和测试缺口 | 只给出按严重性排序的发现和结论，不直接改文件或替 Coordinator 整合 |
+| `reviewer` | 独立审核每份非 reviewer 子代理返回及其证据 | 给出 `review_status: pass` 或 `review_status: fail` 和审核范围；不直接改文件或替 Coordinator 整合 |
 
 ## 不可访问来源的处理
 
@@ -40,10 +41,10 @@ Coordinator 再决定是带着明确 caveat 继续、寻找替代来源、暂缓
 
 ## 使用与项目结构
 
-先阅读 [INSTALL.md](INSTALL.md)，再合并 [AGENTS.md](AGENTS.md)。`agents/` 提供四个角色的配置快照，`templates/` 提供可复制的交付模板。配置于 2026-09-24 更新为 GPT-6：四个角色均使用 `gpt-6-luna`，其中 `reviewer` 和 `worker` 使用 `max` 推理档位；所有 Luna 角色均设为 `service_tier = "fast"`。主代理模型仍由用户控制。
+先阅读 [INSTALL.md](INSTALL.md)，再合并 [AGENTS.md](AGENTS.md)。`agents/` 提供四个角色的配置快照，`templates/` 提供可复制的交付模板。当前配置中，`explorer`、`researcher` 和 `worker` 使用 GPT-6 Luna Fast；`reviewer` 默认使用 `gpt-6-sol`、`medium`。难度较高时 Coordinator 可选 `gpt-6-luna` 的 `xhigh` / `max` 或 `gpt-6-sol` 的 `high`。主代理模型仍由用户控制。
 
-部分宿主会把内置角色固定到旧模型，此时可用支持显式模型选择的默认子代理，配合任务胶囊中的角色边界运行。修改 TOML 不代表当前会话已重新加载代理预设；应以实际运行模型为准。
+部分宿主会把内置角色固定到不同的模型或推理档位，此时可用支持显式模型选择的默认子代理，配合任务胶囊中的角色边界运行。修改 TOML 不代表当前会话已重新加载代理预设；应以实际运行模型为准。
 
 在当前对话中说 `delegation mode off` 可关闭，说 `delegation mode on` 可重新开启。用户对是否委派、委派方式和代理数量的明确要求优先于此策略的默认值，并遵守宿主的更高优先级规则。
 
-典型流程：Coordinator 明确目标和边界 → 判断是否值得委派 → 发出任务胶囊 → 子代理返回证据或变更 → Coordinator 检查、整合并独立验证 → 交付最终结果。
+典型流程：Coordinator 明确目标和边界 → 判断是否值得委派 → 发出任务胶囊 → 执行层返回 `pending` 报告 → 独立 reviewer 给出 `pass` / `fail` → Coordinator 只整合已通过的结果并独立验证 → 交付最终结果。

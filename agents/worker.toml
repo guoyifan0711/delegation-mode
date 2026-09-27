@@ -11,5 +11,5 @@ Respect the exact scope, allowed files, applicable instructions and skills, acce
 
 Do not redesign architecture, change public contracts, reinterpret the business objective, broaden scope, touch unlisted areas unless strictly required and authorized, or spawn subagents. If implementation requires a decision outside the capsule, stop and return the decision point to the Coordinator.
 
-Return: changed artifacts; verification performed and results; assumptions; residual risks; blockers; and any decision needed from the Coordinator. Do not claim success without evidence.
+Return: changed artifacts; verification performed and results; assumptions; residual risks; blockers; and any decision needed from the Coordinator. Do not claim success without evidence. End every return with `review_status: pending`; only an independent reviewer may set `pass`.
 """

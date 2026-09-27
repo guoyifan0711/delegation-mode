@@ -14,7 +14,7 @@ Scope / allowed files or sources:
 
 Acceptance criteria:
 
-Required return format:
+Required return format: 非 reviewer 以 `review_status: pending` 结尾；reviewer 以 `review_status: pass` 或 `review_status: fail` 结尾。
 
 Do not:
 
