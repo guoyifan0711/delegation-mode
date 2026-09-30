@@ -43,6 +43,8 @@ Coordinator 再决定是带着明确 caveat 继续、寻找替代来源、暂缓
 
 先阅读 [INSTALL.md](INSTALL.md)，再合并 [AGENTS.md](AGENTS.md)。`agents/` 提供四个角色的配置快照，`templates/` 提供可复制的交付模板。当前配置中，`explorer`、`researcher` 和 `worker` 使用 GPT-6 Luna Fast；`reviewer` 默认使用 `gpt-6.1-sol`、`medium`。难度较高时 Coordinator 可选 `gpt-6-luna` 的 `xhigh` / `max` 或 `gpt-6.1-sol` 的 `high`。主代理模型仍由用户控制。
 
+**Luna 子代理默认使用 Fast mode。** `explorer`、`researcher`、`worker` 的配置均设为 `service_tier = "fast"`；reviewer 切换到 Luna 时也遵循这一默认值。Fast mode 与推理档位分别配置；实际是否启用以宿主暴露的运行档位为准，宿主不支持选择或核验时须说明限制。
+
 部分宿主会把内置角色固定到不同的模型或推理档位，此时可用支持显式模型选择的默认子代理，配合任务胶囊中的角色边界运行。修改 TOML 不代表当前会话已重新加载代理预设；应以实际运行模型为准。
 
 在当前对话中说 `delegation mode off` 可关闭，说 `delegation mode on` 可重新开启。用户对是否委派、委派方式和代理数量的明确要求优先于此策略的默认值，并遵守宿主的更高优先级规则。
