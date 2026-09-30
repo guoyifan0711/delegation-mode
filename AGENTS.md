@@ -85,7 +85,7 @@ Use the smallest useful context fork. Prefer no inherited history or only the fe
 
 ## Model routing
 
-- The review gate defaults to `gpt-6-sol` with `medium` reasoning. For harder reviews, the Coordinator may select `gpt-6-luna` with `xhigh` or `max`, or `gpt-6-sol` with `high`; record the choice in the review capsule.
+- The review gate defaults to `gpt-6.1-sol` with `medium` reasoning. For harder reviews, the Coordinator may select `gpt-6-luna` with `xhigh` or `max`, or `gpt-6.1-sol` with `high`; record the choice in the review capsule.
 - Keep the user-selected primary model unchanged. Use the configured GPT-6 model for each subagent role when the host honors that role's configuration.
 - If a host's named role preset pins a different model or effort from the requested one, use a default subagent with an explicit supported GPT-6 model and the selected role's boundaries in its task capsule. Use no inherited history, or only the few turns needed, when setting a model override.
 - If the host cannot run the requested GPT-6 model, report that limit instead of silently using an older model. A configuration file change does not prove that an already-running session reloaded its agent presets.

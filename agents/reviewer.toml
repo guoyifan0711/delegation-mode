@@ -1,6 +1,6 @@
 name = "reviewer"
 description = "Required independent review gate for every non-reviewer subagent return."
-model = "gpt-6-sol"
+model = "gpt-6.1-sol"
 model_reasoning_effort = "medium"
 service_tier = "default"
 sandbox_mode = "read-only"

@@ -13,7 +13,7 @@
 
 如需使用 `agents/*.toml`，逐个审阅后复制到目标环境配置的代理目录（例如配置的 Codex home 下的 `agents` 目录）。这些文件是当前环境的配置快照，不是跨主机兼容性承诺：模型名称、推理档位、服务层级、沙箱能力和可用字段都可能随主机或版本变化。目标环境不支持的字段应按其文档调整或移除，不能因为快照看起来可用就假设它能加载。
 
-当前快照中，`explorer`、`researcher` 和 `worker` 使用 `gpt-6-luna` 与 `service_tier = "fast"`；`reviewer` 默认使用 `gpt-6-sol`、`medium` 和 `service_tier = "default"`。难度较高时 Coordinator 可选 Luna `xhigh` / `max` 或 Sol `high`。若内置角色预设固定在不同的模型或推理档位，应在支持显式选择的默认子代理中加载相同的角色边界和任务胶囊；不能把更新配置文件等同于正在运行的会话已切换模型或服务层级。
+当前快照中，`explorer`、`researcher` 和 `worker` 使用 `gpt-6-luna` 与 `service_tier = "fast"`；`reviewer` 默认使用 `gpt-6.1-sol`、`medium` 和 `service_tier = "default"`。难度较高时 Coordinator 可选 Luna `xhigh` / `max` 或 Sol `high`。若内置角色预设固定在不同的模型或推理档位，应在支持显式选择的默认子代理中加载相同的角色边界和任务胶囊；不能把更新配置文件等同于正在运行的会话已切换模型或服务层级。
 
 如果只要求子代理使用 Fast，保持用户级 `config.toml` 的全局 `service_tier` 不变；全局修改会同时影响主代理。
 
